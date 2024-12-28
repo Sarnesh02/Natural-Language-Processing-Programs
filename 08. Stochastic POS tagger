@@ -1,0 +1,80 @@
+import nltk
+from nltk.corpus import treebank
+from nltk import pos_tag, word_tokenize
+from collections import defaultdict
+import random
+
+nltk.download('treebank') 
+nltk.download('punkt')   
+
+train_sents = treebank.tagged_sents()
+
+def calculate_probabilities(tagged_sents):
+    emission_probs = defaultdict(lambda: defaultdict(int))
+    transition_probs = defaultdict(lambda: defaultdict(int))
+
+    for sent in tagged_sents:
+        prev_tag = None
+        for word, tag in sent:
+            emission_probs[tag][word] += 1
+            if prev_tag is not None:
+                transition_probs[prev_tag][tag] += 1
+            prev_tag = tag
+
+    for tag in emission_probs:
+        total = float(sum(emission_probs[tag].values()))
+        for word in emission_probs[tag]:
+            emission_probs[tag][word] /= total  # P(word | tag)
+
+    for prev_tag in transition_probs:
+        total = float(sum(transition_probs[prev_tag].values()))
+        for tag in transition_probs[prev_tag]:
+            transition_probs[prev_tag][tag] /= total  # P(tag_i | tag_(i-1))
+
+    return emission_probs, transition_probs
+
+def tag_sentence_viterbi(sentence, emission_probs, transition_probs, start_tag='START'):
+    n = len(sentence)
+    dp = defaultdict(lambda: defaultdict(float))
+    backpointer = defaultdict(lambda: defaultdict(str))
+    
+    dp[0][start_tag] = 1.0  # P(START)
+    
+    for i in range(1, n + 1):
+        word = sentence[i - 1]
+        for prev_tag in transition_probs:
+            for tag in emission_probs:
+                trans_prob = transition_probs[prev_tag].get(tag, 0)
+                emit_prob = emission_probs[tag].get(word, 0)
+                prob = dp[i - 1][prev_tag] * trans_prob * emit_prob
+                
+                if prob > dp[i][tag]:
+                    dp[i][tag] = prob
+                    backpointer[i][tag] = prev_tag
+    
+    best_tag_sequence = []
+    current_tag = max(dp[n], key=dp[n].get)
+    best_tag_sequence.append(current_tag)
+    
+    for i in range(n, 0, -1):
+        current_tag = backpointer[i][current_tag]
+        best_tag_sequence.insert(0, current_tag)
+    
+    return list(zip(sentence, best_tag_sequence))
+
+def stochastic_pos_tagging(text):
+    sentence = word_tokenize(text)
+    
+    emission_probs, transition_probs = calculate_probabilities(train_sents)
+    
+    tagged_sentence = tag_sentence_viterbi(sentence, emission_probs, transition_probs)
+    
+    return tagged_sentence
+
+sentence = "The quick brown fox jumps over the lazy dog."
+
+tagged_output = stochastic_pos_tagging(sentence)
+
+print("Tagged Sentence:")
+for word, tag in tagged_output:
+    print(f"{word}: {tag}")

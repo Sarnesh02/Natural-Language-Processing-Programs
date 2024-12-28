@@ -1,0 +1,63 @@
+import nltk
+from nltk.tokenize import word_tokenize
+
+def initial_tagging(tokens):
+  
+    tagged = []
+    for word in tokens:
+        word_lower = word.lower()
+
+        if word_lower.endswith('ly'):
+            tagged.append((word, 'RB'))
+
+        elif word_lower.endswith('ed'):
+            tagged.append((word, 'VBD'))
+
+        elif word_lower.endswith('ing'):
+            tagged.append((word, 'VBG'))
+
+        elif word[0].isupper():
+            tagged.append((word, 'NNP'))
+
+        elif word_lower == 'the':
+            tagged.append((word, 'DT'))
+
+        else:
+            tagged.append((word, 'NN'))
+
+    return tagged
+
+def apply_transformations(tagged):
+   
+    transformations = []
+
+    for i in range(1, len(tagged)):
+        prev_word, prev_tag = tagged[i - 1]
+        current_word, current_tag = tagged[i]
+
+        if prev_tag == 'DT' and current_tag.startswith('VB'):
+            transformations.append((i, 'VBZ'))  # Change verb to VBZ (third-person singular)
+
+    for idx, new_tag in transformations:
+        word, _ = tagged[idx]
+        tagged[idx] = (word, new_tag)
+    
+    return tagged
+
+def tag_sentence(sentence):
+
+    tokens = word_tokenize(sentence)
+    
+    initial_tags = initial_tagging(tokens)
+    
+    final_tags = apply_transformations(initial_tags)
+    
+    return final_tags
+
+sentence = "The quick brown fox jumps over the lazy dog."
+
+tagged_sentence = tag_sentence(sentence)
+
+print("Tagged Sentence (after transformation-based tagging):")
+for word, tag in tagged_sentence:
+    print(f"{word}: {tag}")

@@ -1,0 +1,17 @@
+import nltk
+from nltk.tokenize import word_tokenize
+from nltk import pos_tag
+nltk.download('punkt') 
+nltk.download('averaged_perceptron_tagger')
+text = """
+Natural language processing (NLP) is a subfield of artificial intelligence concerned with 
+the interactions between computers and human (natural) languages, and, in particular, 
+concerned with programming computers to fruitfully process large natural language data.
+"""
+
+tokens = word_tokenize(text)
+tagged_tokens = pos_tag(tokens)
+
+print("POS Tagging Results:")
+for word, tag in tagged_tokens:
+    print(f"{word}: {tag}")

@@ -1,0 +1,45 @@
+import nltk
+from nltk.tokenize import word_tokenize
+
+nltk.download('punkt')  # For tokenizing words
+
+def pos_tag_using_rules(tokens):
+    tagged = []
+    for word in tokens:
+        word_lower = word.lower()
+
+        if word_lower.endswith('ly'):
+            tagged.append((word, 'RB'))
+
+        elif word_lower.endswith('ed'):
+            tagged.append((word, 'VBD'))
+
+        elif word_lower.endswith('ing'):
+            tagged.append((word, 'VBG'))
+
+        elif word[0].isupper():
+            tagged.append((word, 'NNP'))
+
+        elif word_lower == 'the':
+            tagged.append((word, 'DT'))
+
+        elif word_lower in ['dog', 'cat', 'car', 'tree']:  # Example common nouns (you can expand this list)
+            tagged.append((word, 'NN'))
+
+        elif word_lower in ['in', 'on', 'at', 'by', 'with']:
+            tagged.append((word, 'IN'))
+
+        else:
+            tagged.append((word, 'NN'))
+
+    return tagged
+
+sentence = "The quick brown fox jumps over the lazy dog."
+
+tokens = word_tokenize(sentence)
+
+tagged_sentence = pos_tag_using_rules(tokens)
+
+print("Tagged Sentence:")
+for word, tag in tagged_sentence:
+    print(f"{word}: {tag}")

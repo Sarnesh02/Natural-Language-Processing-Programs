@@ -1,45 +1,40 @@
-import nltk
-from nltk.tokenize import word_tokenize
+import re
 
-nltk.download('punkt')  # For tokenizing words
+class RuleBasedPOSTagger:
+    def __init__(self):
+        self.rules = [
+            (r'.*ed$', 'VBD'),  
+            (r'.*ing$', 'VBG'),  
+            (r'\b(is|am|are)\b', 'VBZ'),  
+            (r'\b(the|a|an)\b', 'DT'),  
+            (r'\b([A-Z][a-z]*)\b', 'NNP'),  
+            (r'\b([a-z]+)\b', 'NN'),  
+            (r'\b([A-Za-z]+)\b', 'VB'),  
+            (r'\b(\d+)\b', 'CD'),  
+            (r'\b(in|on|at|by|with|for)\b', 'IN'), 
+            (r'\b(and|or|but)\b', 'CC'), 
+            (r'\b(\w+)\b', 'RB'), 
+        ]
+        
+    def tag(self, sentence):
+        words = sentence.split()
+        tagged_sentence = []
+        
+        for word in words:
+            tagged = False
+            for pattern, tag in self.rules:
+                if re.fullmatch(pattern, word):
+                    tagged_sentence.append((word, tag))
+                    tagged = True
+                    break
+            if not tagged:
+                tagged_sentence.append((word, 'NN')) 
+            
+        return tagged_sentence
 
-def pos_tag_using_rules(tokens):
-    tagged = []
-    for word in tokens:
-        word_lower = word.lower()
+sentence = "The dog is running fast with a ball"
+tagger = RuleBasedPOSTagger()
+tags = tagger.tag(sentence)
 
-        if word_lower.endswith('ly'):
-            tagged.append((word, 'RB'))
-
-        elif word_lower.endswith('ed'):
-            tagged.append((word, 'VBD'))
-
-        elif word_lower.endswith('ing'):
-            tagged.append((word, 'VBG'))
-
-        elif word[0].isupper():
-            tagged.append((word, 'NNP'))
-
-        elif word_lower == 'the':
-            tagged.append((word, 'DT'))
-
-        elif word_lower in ['dog', 'cat', 'car', 'tree']:  # Example common nouns (you can expand this list)
-            tagged.append((word, 'NN'))
-
-        elif word_lower in ['in', 'on', 'at', 'by', 'with']:
-            tagged.append((word, 'IN'))
-
-        else:
-            tagged.append((word, 'NN'))
-
-    return tagged
-
-sentence = "The quick brown fox jumps over the lazy dog."
-
-tokens = word_tokenize(sentence)
-
-tagged_sentence = pos_tag_using_rules(tokens)
-
-print("Tagged Sentence:")
-for word, tag in tagged_sentence:
-    print(f"{word}: {tag}")
+for word, tag in tags:
+    print(f'{word}: {tag}')

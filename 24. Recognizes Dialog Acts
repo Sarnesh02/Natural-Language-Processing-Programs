@@ -1,0 +1,47 @@
+import re
+
+def classify_dialog_act(utterance):
+    utterance = utterance.lower().strip()
+    
+    if re.match(r'^(hi|hello|hey|good morning|good evening)', utterance):
+        return "Greeting"
+    elif re.match(r'^(bye|goodbye|see you|take care)', utterance):
+        return "Farewell"
+    elif re.match(r'^(how|what|why|when|where|who|is|are|does|do|can|could|shall|should|will|would|did)', utterance):
+        return "Question"
+    elif re.match(r'^(thank you|thanks|much appreciated|i appreciate it)', utterance):
+        return "Thanking"
+    elif re.match(r'^(sorry|i apologize|my apologies)', utterance):
+        return "Apology"
+    elif re.match(r'^(yes|no|maybe|okay|alright|sure|of course|definitely)', utterance):
+        return "Response"
+    else:
+        return "Statement"
+
+
+def analyze_conversation(conversation):
+    dialog_acts = []
+    for i, utterance in enumerate(conversation):
+        act = classify_dialog_act(utterance)
+        dialog_acts.append((i + 1, utterance, act))
+    return dialog_acts
+
+
+def main():
+    print("Enter the conversation line by line. Type 'END' to finish:")
+    conversation = []
+    while True:
+        line = input()
+        if line.strip().upper() == "END":
+            break
+        conversation.append(line)
+
+    print("\nRecognizing dialog acts...\n")
+    results = analyze_conversation(conversation)
+
+    for turn, utterance, act in results:
+        print(f"Turn {turn}: {utterance} -> Dialog Act: {act}")
+
+
+if __name__ == "__main__":
+    main()

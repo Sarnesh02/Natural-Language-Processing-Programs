@@ -1,0 +1,37 @@
+import nltk
+from nltk import CFG
+from nltk import ProbabilisticProduction
+from nltk.parse import ViterbiParser
+
+pcfg = CFG.fromstring("""
+    S -> NP VP
+    NP -> DT NN | DT NNS
+    VP -> VBZ NP | VBP VP
+    DT -> 'the' | 'a'
+    NN -> 'dog' | 'cat'
+    NNS -> 'dogs' | 'cats'
+    VBZ -> 'barks' | 'runs'
+    VBP -> 'bark' | 'run'
+""")
+
+productions = [
+    ProbabilisticProduction(pcfg.productions()[0].lhs(), pcfg.productions()[0].rhs(), 1.0),
+    ProbabilisticProduction(pcfg.productions()[1].lhs(), pcfg.productions()[1].rhs(), 0.5),
+    ProbabilisticProduction(pcfg.productions()[2].lhs(), pcfg.productions()[2].rhs(), 0.5),
+    ProbabilisticProduction(pcfg.productions()[3].lhs(), pcfg.productions()[3].rhs(), 0.6),
+    ProbabilisticProduction(pcfg.productions()[4].lhs(), pcfg.productions()[4].rhs(), 0.7),
+    ProbabilisticProduction(pcfg.productions()[5].lhs(), pcfg.productions()[5].rhs(), 0.3),
+    ProbabilisticProduction(pcfg.productions()[6].lhs(), pcfg.productions()[6].rhs(), 0.7),
+    ProbabilisticProduction(pcfg.productions()[7].lhs(), pcfg.productions()[7].rhs(), 0.3),
+    ProbabilisticProduction(pcfg.productions()[8].lhs(), pcfg.productions()[8].rhs(), 0.7),
+    ProbabilisticProduction(pcfg.productions()[9].lhs(), pcfg.productions()[9].rhs(), 0.3),
+]
+
+probabilistic_grammar = CFG(pcfg.start(), productions)
+
+parser = ViterbiParser(probabilistic_grammar)
+
+sentence = "the dog barks".split()
+
+for tree in parser.parse(sentence):
+    print(tree)

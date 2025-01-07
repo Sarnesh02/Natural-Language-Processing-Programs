@@ -1,0 +1,31 @@
+import openai
+
+API_KEY = "your_openai_api_key_here"
+
+openai.api_key = API_KEY
+
+def generate_text(prompt, model="text-davinci-003", max_tokens=150):
+    
+    try:
+        response = openai.Completion.create(
+            engine=model,
+            prompt=prompt,
+            max_tokens=max_tokens,
+            temperature=0.7,
+            n=1, 
+            stop=None  
+        )
+        return response.choices[0].text.strip()
+    except Exception as e:
+        return f"Error: {e}"
+
+def main():
+    print("Welcome to GPT-3 Text Generator!")
+    prompt = input("Enter your prompt: ")
+    
+    print("\nGenerating text...\n")
+    generated_text = generate_text(prompt)
+    print(f"Generated Text:\n{generated_text}")
+
+if __name__ == "__main__":
+    main()
